@@ -30,7 +30,7 @@ export default async function SummaryPage(props: {
   const readingTime = Math.ceil((word_count || 0) / 200);
 
   return (
-    <div className="relative isolate min-h-screen bg-linear-to-r from-rose-50/40 to-white">
+    <div className="relative isolate min-h-screen bg-linear-to-b from-rose-50/40 to-white">
       <BgGradient className=" from-rose-400 via-rose-300  to-orange-200" />
 
       <div className="container mx-auto flex flex-col gap-4">

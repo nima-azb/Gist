@@ -16,7 +16,7 @@ const NavigationControls = ({
   onSectionSelect: (index: number) => void;
 }) => {
   return (
-    <div className="bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xs border-t border-rose-500/10">
+    <div className="p-4 bg-background/80 backdrop-blur-xs border-t border-rose-500/10">
       <div className="flex items-center justify-between">
         <Button
           variant={"ghost"}
