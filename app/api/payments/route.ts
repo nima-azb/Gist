@@ -1,10 +1,14 @@
-import { error } from "console";
+import {
+  handleCheckoutSessionCompleted,
+  handleSubscriptionDeleted,
+} from "@/lib/payments";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export const POST = async (req: NextRequest) => {
+  console.log("Webhook route hit");
   const payload = await req.text();
 
   const sig = req.headers.get("stripe-signature");
@@ -17,8 +21,25 @@ export const POST = async (req: NextRequest) => {
 
     switch (event.type) {
       case "checkout.session.completed":
-        const session = event.data.object;
-        console.log(session);
+        console.log("checkout.session completed");
+        const sessionId = event.data.object.id;
+
+        const session = await stripe.checkout.sessions.retrieve(sessionId, {
+          expand: ["line_items"],
+        });
+
+        await handleCheckoutSessionCompleted({ session, stripe });
+
+        break;
+      case "customer.subscription.deleted":
+        console.log("Customer subscription deleted");
+        const subscription = event.data.object;
+        const subscriptionId = event.data.object.id;
+
+        await handleSubscriptionDeleted({ subscriptionId, stripe });
+
+        console.log(subscription);
+
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);
