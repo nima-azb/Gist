@@ -42,7 +42,20 @@ export async function handleSubscriptionDeleted({
 }: {
   subscriptionId: string;
   stripe: Stripe;
-}) {}
+}) {
+  console.log("SubscriptionDeleted", subscriptionId);
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const sql = await getDbConnection();
+
+    await sql`UPDATE users SET status = 'cancelled' WHERE customer_id = ${subscription.customer}`;
+    console.log("Subscription cancelled succesfully");
+  } catch (error) {
+    console.error("Error handling subscription deleted", error);
+    throw error;
+  }
+}
 
 async function createOrUpdateUser({
   sql,
