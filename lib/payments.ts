@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { getDbConnection } from "./db";
+import { getDbConnection } from "@/lib/db";
 
 export async function handleCheckoutSessionCompleted({
   session,
@@ -8,7 +8,7 @@ export async function handleCheckoutSessionCompleted({
   session: Stripe.Checkout.Session;
   stripe: Stripe;
 }) {
-  console.log("Checkout");
+  console.log("Checkout session completed", session);
   const customerId = session.customer as string;
   const customer = await stripe.customers.retrieve(customerId);
   const priceId = session.line_items?.data[0].price?.id;
@@ -16,13 +16,13 @@ export async function handleCheckoutSessionCompleted({
   if ("email" in customer && priceId) {
     const { email, name } = customer;
 
-    const sql = getDbConnection();
+    const sql = await getDbConnection();
 
     await createOrUpdateUser({
       sql,
       email: email as string,
-      fullName: name as string,
-      customerId,
+      full_name: name as string,
+      customer_id: customerId,
       priceId: priceId as string,
       status: "active",
     });
@@ -36,50 +36,27 @@ export async function handleCheckoutSessionCompleted({
   }
 }
 
-export async function handleSubscriptionDeleted({
-  subscriptionId,
-  stripe,
-}: {
-  subscriptionId: string;
-  stripe: Stripe;
-}) {
-  console.log("SubscriptionDeleted", subscriptionId);
-
-  try {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const sql = await getDbConnection();
-
-    await sql`UPDATE users SET status = 'cancelled' WHERE customer_id = ${subscription.customer}`;
-    console.log("Subscription cancelled succesfully");
-  } catch (error) {
-    console.error("Error handling subscription deleted", error);
-    throw error;
-  }
-}
-
 async function createOrUpdateUser({
   sql,
   email,
-  fullName,
-  customerId,
+  full_name,
+  customer_id,
   priceId,
   status,
 }: {
   sql: any;
   email: string;
-  fullName: string;
-  customerId: string;
+  full_name: string;
+  customer_id: string;
   priceId: string;
   status: string;
 }) {
   try {
     const user = await sql`SELECT * FROM users WHERE email = ${email}`;
     if (user.length === 0) {
-      await sql`INSERT INTO users (email, full_name, customer_id,price_id, status) VALUES (${email}, ${fullName}, ${customerId}, ${priceId}, ${status})`;
+      await sql`INSERT INTO users (email, full_name, customer_id,price_id, status) VALUES (${email}, ${full_name}, ${customer_id}, ${priceId}, ${status})`;
     }
-  } catch (error) {
-    console.error("Error creating or updating user", error);
-  }
+  } catch (err) {}
 }
 
 async function createPayment({
@@ -98,5 +75,24 @@ async function createPayment({
     await sql`INSERT INTO payments (amount, status, stripe_payment_id,price_id,user_email) VALUES (${amount_total}, ${status}, ${id}, ${priceId}, ${userEmail})`;
   } catch (error) {
     console.log("Error creating payment", error);
+  }
+}
+
+export async function handleSubscriptionDeleted({
+  subscriptionId,
+  stripe,
+}: {
+  subscriptionId: string;
+  stripe: Stripe;
+}) {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const sql = await getDbConnection();
+
+    await sql`UPDATE users SET status = 'cancelled' WHERE customer_id = ${subscription.customer}`;
+    console.log("Subscription canceled successfully");
+  } catch (error) {
+    console.log("Error handling subscription deleted", error);
+    throw error;
   }
 }

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowRight, CheckIcon } from "lucide-react";
 import Link from "next/link";
+import { pricingPlans } from "@/utils/constants";
 
 type PriceType = {
   name: string;
@@ -11,36 +12,6 @@ type PriceType = {
   paymentLink: string;
   priceId: string;
 };
-
-const plans = [
-  {
-    id: "basic",
-    name: "basic",
-    description: "Perfect for occasional use",
-    price: 9,
-    items: [
-      "5 PDF summaries per month",
-      "Standard processing speed",
-      "Email support",
-    ],
-    paymentLink: "",
-    priceId: "",
-  },
-  {
-    id: "pro",
-    name: "pro",
-    description: "For professionals and teams",
-    price: 19,
-    items: [
-      "Unlimited PDF summaries",
-      "Priority processing",
-      "24/7 priority support",
-      "Markdown Export",
-    ],
-    paymentLink: "",
-    priceId: "",
-  },
-];
 
 const PricingCard = ({
   id,
@@ -56,7 +27,7 @@ const PricingCard = ({
       <div
         className={cn(
           "relative flex flex-col h-full gap-4 lg:gap-8 z-10 p-8 border-[1px] border-gray-500/20 rounded-2xl",
-          id === "pro" && "border-rose-500 gap-5 border-2"
+          id === "pro" && "border-rose-500 gap-5 border-2",
         )}
       >
         <div className="flex justify-between items-center gap-">
@@ -88,7 +59,7 @@ const PricingCard = ({
               "w-full rounded-full flex items-center justify-center gap-2 bg-linear-to-r from-rose-800 to-rose-500 hover:from-rose-500 hover:to-rose-800 text-white border-2 py-2",
               id === "pro"
                 ? "border-rose-900"
-                : "border-rose-100 from-rose-400 to-rose-500"
+                : "border-rose-100 from-rose-400 to-rose-500",
             )}
           >
             Buy Now
@@ -110,7 +81,7 @@ const PricingSection = () => {
           </h2>
         </div>
         <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch gap-8">
-          {plans.map((plan) => (
+          {pricingPlans.map((plan) => (
             <PricingCard key={plan.id} {...plan} />
           ))}
         </div>
