@@ -15,11 +15,11 @@ const schema = z.object({
     .instanceof(File, { message: "Invalid File" })
     .refine(
       (file) => file.size <= 20 * 1024 * 1024,
-      "File size must be less than 20MB"
+      "File size must be less than 20MB",
     )
     .refine(
       (file) => file.type.startsWith("application/pdf"),
-      "File must be a PDF"
+      "File must be a PDF",
     ),
 });
 
@@ -126,11 +126,39 @@ const UploadForm = () => {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl">
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="w-full border-t border-gray-200 dark:border-gray-800" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-background px-3 text-muted-foreground text-sm">
+            Upload PDF
+          </span>
+        </div>
+      </div>
       <UploadFormInput
         isLoading={isLoading}
         ref={formRef}
         onSubmit={handleSubmit}
       />
+      {isLoading && (
+        <>
+          <div className="relative">
+            <div
+              className="absolute inset-0 flex items-center"
+              aria-hidden="true"
+            >
+              <div className="w-full border-t border-gray-200 dark:border-gray-800" />
+            </div>
+
+            <div className="relative flex justify-center">
+              <span className="bg-background px-3 text-muted-foreground text-sm">
+                Processing
+              </span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
